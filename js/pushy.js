@@ -1,107 +1,131 @@
-/*! Pushy - v0.9.2 - 2014-9-13
-* Pushy is a responsive off-canvas navigation menu using CSS transforms & transitions.
+/*! Heavily Refactored Pushy - v0.9.3 - 2014-10-02
+* Pushy is a responsive off-canvas navigation menu using CSS transitions.
 * https://github.com/christophery/pushy/
-* by Christopher Yee */
+* by Christopher Yee - Marie Alhomme */
 
-$(function() {
-	var pushy = $('.pushy'), //menu css class
-		body = $('body'),
-		container = $('#container'), //container css class
-		push = $('.push'), //css class to add pushy capability
-		siteOverlay = $('.site-overlay'), //site overlay
-		pushyClass = "pushy-left pushy-open", //menu position & menu open class
-		pushyActiveClass = "pushy-active", //css class to toggle site overlay
-		containerClass = "container-push", //container open class
-		pushClass = "push-push", //css class to add pushy capability
-		menuBtn = $('.menu-btn, .pushy a'), //css classes to toggle the menu
-		menuSpeed = 200, //jQuery fallback menu speed
-		menuWidth = pushy.width() + "px"; //jQuery fallback menu width
+;(function($){
 
-	function togglePushy(){
-		body.toggleClass(pushyActiveClass); //toggle site overlay
-		pushy.toggleClass(pushyClass);
-		container.toggleClass(containerClass);
-		push.toggleClass(pushClass); //css class to add pushy capability
-	}
+	$.fn.pushy = function(options){
 
-	function openPushyFallback(){
-		body.addClass(pushyActiveClass);
-		pushy.animate({left: "0px"}, menuSpeed);
-		container.animate({left: menuWidth}, menuSpeed);
-		push.animate({left: menuWidth}, menuSpeed); //css class to add pushy capability
-	}
+		/**
+		 * Default options
+		 */
 
-	function closePushyFallback(){
-		body.removeClass(pushyActiveClass);
-		pushy.animate({left: "-" + menuWidth}, menuSpeed);
-		container.animate({left: "0px"}, menuSpeed);
-		push.animate({left: "0px"}, menuSpeed); //css class to add pushy capability
-	}
-
-	//checks if 3d transforms are supported removing the modernizr dependency
-	cssTransforms3d = (function csstransforms3d(){
-		var el = document.createElement('p'),
-		supported = false,
-		transforms = {
-		    'webkitTransform':'-webkit-transform',
-		    'OTransform':'-o-transform',
-		    'msTransform':'-ms-transform',
-		    'MozTransform':'-moz-transform',
-		    'transform':'transform'
+		var defaults = {
+			pushySide			: 'left',
+			pushyActiveClass	: 'pushy-active',
+			containerId			: 'container',
+			overlayId			: 'site-overlay',
+			pushyBtn			: '<button type="button" class="menu-btn"><i class="icon-menu"></i> <span class="visuallyhidden"></span></button>',
+			menuSpeed			: 200,
+			init				: true,
+			destroy				: false
 		};
 
-		// Add it to the body to get the computed style
-		document.body.insertBefore(el, null);
+		var opts = $.extend( {}, defaults, options );
 
-		for(var t in transforms){
-		    if( el.style[t] !== undefined ){
-		        el.style[t] = 'translate3d(1px,1px,1px)';
-		        supported = window.getComputedStyle(el).getPropertyValue(transforms[t]);
+		var pushyNav = this,
+			pushySide = opts.pushySide,
+			pushySideClass = 'pushy-'+pushySide,
+			pushyActiveClass = opts.pushyActiveClass,
+			menuWidth = pushyNav.width() + 'px';
+
+		//checks if transitions are supported
+		var cssTransitions = (function csstransitions(){
+			var el = document.createElement('div');
+
+		    var transEndEventNames = {
+		      WebkitTransition : 'webkitTransitionEnd',
+		      MozTransition    : 'transitionend',
+		      OTransition      : 'oTransitionEnd otransitionend',
+		      transition       : 'transitionend'
+		    };
+
+		    for (var name in transEndEventNames) {
+		      if (el.style[name] !== undefined) {
+		        return true;
+		      }
 		    }
-		}
 
-		document.body.removeChild(el);
+		    return false; // explicit for ie8 (  ._.)
+		})();
 
-		return (supported !== undefined && supported.length > 0 && supported !== "none");
-	})();
+		/**
+		 * Start Navigation functions
+		 */
 
-	if(cssTransforms3d){
-		//toggle menu
-		menuBtn.click(function() {
-			togglePushy();
-		});
-		//close menu when clicking site overlay
-		siteOverlay.click(function(){ 
-			togglePushy();
-		});
-	}else{
-		//jQuery fallback
-		pushy.css({left: "-" + menuWidth}); //hide menu by default
-		container.css({"overflow-x": "hidden"}); //fixes IE scrollbar issue
+		return this.each(function() {
 
-		//keep track of menu state (open/close)
-		var state = true;
-
-		//toggle menu
-		menuBtn.click(function() {
-			if (state) {
-				openPushyFallback();
-				state = false;
-			} else {
-				closePushyFallback();
-				state = true;
+			function openPushyFallback(){
+				$('body,html').addClass(pushyActiveClass);
+				pushyNav.animate({pushySide: "0px"}, opts.menuSpeed);
+				$('#container').animate({pushySide: menuWidth}, opts.menuSpeed);
 			}
+
+			function closePushyFallback(){
+				$('body,html').removeClass(pushyActiveClass);
+				pushyNav.animate({pushySide: "-" + menuWidth}, opts.menuSpeed);
+				$('#container').animate({pushySide: "0px"}, opts.menuSpeed);
+			}
+
+			function initPushy() {
+				$('body').addClass(pushySideClass);
+				$('#container').before(pushyNav);
+				if ( $('.menu-btn').size() === 0 ) {
+					$('#header').prepend(opts.pushyBtn);
+				}
+				$('#wrapper').prepend('<div id="'+opts.overlayId+'" />');
+				if (cssTransitions) {
+					alert('transitions');
+					$('.menu-btn, #'+opts.overlayId).on('click', function(e) {
+						e.preventDefault();
+						$('body,html').toggleClass(pushyActiveClass);
+					});
+				} else {
+					alert('no transitions');
+					//jQuery fallback
+					pushyNav.css({pushySide: "-" + menuWidth}); //hide menu by default
+					$('#container').css({"overflow-x": "hidden"}); //fixes IE scrollbar issue
+
+					//keep track of menu state (open/close)
+					var state = true;
+
+					$('.menu-btn, #'+opts.overlayId).on('click', function(e) {
+						e.preventDefault();
+						if (state) {
+							openPushyFallback();
+							state = false;
+						} else {
+							closePushyFallback();
+							state = true;
+						}
+					});
+				}
+			}
+
+			function destroyPushy() {
+				if(!cssTransitions){
+					pushyNav.css({left: "auto"}); //hide menu by default
+					$('#container').css({"overflow-x": "auto"}); //fixes IE scrollbar issue
+				}
+				$('.menu-btn').remove();
+				$('body, html').removeClass(pushySideClass).removeClass(pushyActiveClass);
+				$('#'+opts.overlayId).remove();
+				$('#header').append(pushyNav);
+			}
+
+			if(opts.init){
+				initPushy();
+				return;
+			}
+
+			if(opts.destroy){
+				destroyPushy();
+				return;
+			}
+
 		});
 
-		//close menu when clicking site overlay
-		siteOverlay.click(function(){ 
-			if (state) {
-				openPushyFallback();
-				state = false;
-			} else {
-				closePushyFallback();
-				state = true;
-			}
-		});
-	}
-});
+	};
+
+})(jQuery);

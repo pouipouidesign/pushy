@@ -1,0 +1,121 @@
+$offcanvas-bg: #CFCFCF !default;
+$offcanvas-shadow: inset -10px 0 6px -9px rgba(0, 0, 0, .7) !default;
+$offcanvas-width: 75% !default;
+$offcanvas-maxwidth: 300px !default;
+$offcanvas-bg-overlay: rgba(0,0,0,0.5) !default;
+
+/*! Heavily refactored Pushy - v0.9.3 - 2014-10-02
+* Pushy is a responsive off-canvas navigation menu using CSS transitions.
+* https://github.com/christophery/pushy/
+* by Christopher Yee - Marie Alhomme */
+
+/* Menu Appearance */
+
+#site-overlay {
+    display: none;
+}
+#mainNav, #container {
+    position: relative; z-index: 0;
+    width: 100%;
+    @include prefixer($property: transition, $value: .5s all ease);
+}
+html.pushy-active {
+    width: 100%; height: 100%;
+}
+body.pushy-right, body.pushy-left {
+    width: 100%; height: 100%;
+    #wrapper, #container {
+        width: 100%; height: 100%;
+        overflow: hidden;
+    }
+    #mainNav {
+        z-index: 2;
+        height: 100%;
+        overflow: scroll;
+        background: $offcanvas-bg;
+        @include prefixer($property: box-shadow, $value: $offcanvas-shadow, $prefixes: webkit moz spec);
+        -webkit-overflow-scrolling: touch; /* enables momentum scrolling in iOS overflow elements */
+    }
+    &.pushy-active {
+        overflow: hidden;
+        #mainNav {
+            width: $offcanvas-width;
+            max-width: $offcanvas-maxwidth;
+        }
+        #container {
+
+        }
+        #site-overlay {
+            display: block;
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1;
+            background-color: $offcanvas-bg-overlay;
+            @include prefixer($property: animation, $value: fade 500ms);
+        }
+    }
+}
+body.pushy-right {
+    #mainNav, #container {
+        float: right;
+    }
+    #mainNav {
+        margin-right: -100%;
+    }
+    #container {
+        margin-right: 0;
+    }
+    &.pushy-active {
+        #mainNav {
+            margin-right: 0;
+        }
+        #container {
+            margin-left: -100%;
+        }
+    }
+}
+body.pushy-left {
+    #mainNav, #container {
+        float: left;
+    }
+    #mainNav {
+        margin-left: -100%;
+    }
+    #container {
+        margin-left: 0;
+    }
+    &.pushy-active {
+        #mainNav {
+            margin-left: 0;
+        }
+        #container {
+            margin-right: -100%;
+        }
+    }
+}
+
+
+/* Site Overlay Animation */
+
+@keyframes fade {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@-moz-keyframes fade {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@-webkit-keyframes fade {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@-o-keyframes fade {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+}

@@ -1,100 +1,122 @@
 #Pushy
 
-Pushy is a responsive off-canvas navigation menu using CSS transforms & transitions. This project was inspired by the off-canvas navigation menu seen on [Medium](https://medium.com/).
+This is a heavily refactored version of Pushy to add destroy capability (useful with breakpoints) and left/right positioning.
+Push is a responsive off-canvas navigation menu using CSS transitions. This project was inspired by the off-canvas navigation menu seen on [Medium](https://medium.com/).
 
-Pushy has been implemented on many sites, [check them out!](https://github.com/christophery/pushy#sites-using-pushy) Feel free to [let me know](http://www.twitter.com/cmyee) if you use Pushy in one of your websites.
-
-[View Demo](http://www.christopheryee.ca/pushy) | [WordPress Theme](https://github.com/christophery/pushypress)
+[View Demo](http://www.christopheryee.ca/pushy)
 
 ##Features
 
-- Uses CSS transforms & transitions.
+- Uses CSS transitions.
 - Smooth performance on mobile devices.
-- jQuery animation fallback for IE 7 - 9.
-- Menu closes when a link is selected.
+- jQuery animation fallback for IE 9.
 - Menu closes when the site overlay is selected.
 - It's responsive!
 
 ##Requirements
 
-- [jQuery 1.9+](http://jquery.com/)
+- [jQuery 2.x](http://jquery.com/)
 
 ##Install
 
-Download the [packaged source file](https://github.com/christophery/pushy/archive/master.zip), this includes everything you need to get Pushy running on your site.
+Download the [packaged source file](https://github.com/pouipouidesign/pushy/archive/master.zip), this includes everything you need to get Pushy running on your site.
 
-1. Add the stylesheet (pushy.css) in your head and the JS (pushy.min.js) file in your footer.
+1. Add the stylesheet (pushy.css) in your head
 
-2. Insert the following markup into your body.
+OR
+
+1. Import the pushy.scss file in your own, and update variables if needed before compiling
+
+
+2. Add the JS (pushy.min.js) file in your footer
+
+3. Insert the following markup into your body.
 
 ```html
-<!-- Pushy Menu -->
-<nav class="pushy pushy-left">
-    <ul>
-        <li><a href="#">Item 1</a></li>
-        <li><a href="#">Item 2</a></li>
-    </ul>
-</nav>
-
-<!-- Site Overlay -->
-<div class="site-overlay"></div>
-
-<!-- Your Content -->
-<div id="container">
-    <!-- Menu Button -->
-    <div class="menu-btn">&#9776; Menu</div>
+<!-- General Wrapper -->
+<div id="wrapper">
+    <!-- Main Content Wrapper -->
+    <div id="container">
+        <!-- Main Header -->
+        <header id="header" role="banner">
+            <!-- Some classic header content -->
+            <section>
+                <h1>Logo</h1>
+                <p>Tagline</p>
+            </section>
+            <!-- The nav you need to put in offcanvas (will be moved by script) -->
+            <nav role="navigation" class="pushy">
+                <ul>
+                    <li><a href="#">Item 1</a></li>
+                    <li><a href="#">Item 2</a></li>
+                </ul>
+            </nav>
+        </header>
+        <!-- Your main content -->
+        <section role="main" id="main"></section>
+    </div>
 </div>
 ```
 
-##Bower
+4. Instantiate plugin on your element (in page or in your js file)
 
-If your are comfortable with command line, you can install Pushy as a [Bower](http://bower.io/) package:
+$(document).ready(function(){
+    $('#mainNav').pushy({
+        pushySide: 'right'
+    });
+});
 
-```
-bower install pushy
-```
-
-##Tips
-
-- Use the ```.push``` CSS class on HTML elements outside of the ```#container```.
-
-```html
-<header class="push">
-    <h1>This is a Heading</h1>
-    <h2>This is a subheading</h2>
-</header>
-
-<!-- Your Content -->
-<div id="container"></div>
-```
-
-- If you change the width of the ```.pushy``` menu, be sure to update the values in the ```.pushy-left```and ```.container-push, .push-push``` CSS classes.
+- If you change the width of the ```.pushy``` menu, be sure to update the values in the ```.pushy-left``` or ```.pushy-right``` CSS classes.
 
 ```css
 
-.pushy{
-    width: 400px; /* Changed the width to 400px */
-}
-
-.pushy-left{
-    transform: translate3d(-400px,0,0); /* Updated the values */
-    /* Don't forget the vendor prefixes */
-}
-
-.container-push, .push-push{
-    transform: translate3d(400px,0,0); /* Updated the values */
-    /* Don't forget the vendor prefixes */
+body.pushy-right.pushy-active #mainNav, body.pushy-left.pushy-active #mainNav {
+    width: 50%; /* Changed the width to 50% */
+    max-width: 200px; /* Changed the max-width to 200px */
 }
 ```
 
-- If you want to prevent scrolling of your site when Pushy is open just add overflow-x: hidden and height: 100% to both the html & body tags.
+## Options
 
-```css
-html, body{
-    overflow-x: hidden;
-    height: 100%;
-}
+The plugin accepts options, here are the defaults:
+
 ```
+var defaults = {
+    pushySide           : 'left',
+    pushyActiveClass    : 'pushy-active',
+    containerId         : 'container',
+    overlayId           : 'site-overlay',
+    pushyBtn            : '<button type="button" class="menu-btn"><i class="icon-menu"></i> <span class="visuallyhidden"></span></button>',
+    menuSpeed           : 200,
+    init                : true,
+    destroy             : false
+};
+```
+
+## Responsive w/ destroy option
+
+If you use something like [Unison](https://github.com/bjork24/Unison), you can init and destroy the offcanvas according to your breakpoints :
+
+```
+// breakpoints
+var allBreakpoints = Unison.fetch.all();
+
+Unison.on('usn-small', function() {
+    //
+    $('#mainNav').pushy({
+        pushySide: 'right'
+    });
+});
+Unison.on('usn-medium-up', function() {
+    //
+    $('#mainNav').pushy({
+        pushySide: 'right',
+        init: false,
+        destroy: true
+    });
+});
+```
+
 
 ##Browser Compatibility
 
@@ -106,6 +128,13 @@ html, body{
 | Safari (Mac)  | Internet Explorer Mobile (Windows Phone 8) |
 
 ##Version History
+
+0.9.3
+
+- Added possibility to init or destroy plugin instance.
+- Cleanup/Simplification of JS and CSS code.
+- Added right or left position choice.
+- Refactored CSS to SCSS.
 
 0.9.2
 
@@ -138,25 +167,6 @@ html, body{
 - Updated the demo file
 - Updated the read me
 
-##Sites using Pushy
-
-Pushy has been implemented on many sites in the wild, check them out:
-
-- [Firefox OS Devices](https://firefoxosdevices.org/) by [@s_hentzschel](https://twitter.com/s_hentzschel)
-- [Peter Tóth](http://www.petertoth.me/) by [@yednorozec](https://twitter.com/yednorozec)
-- [FulcrumTech](http://www.fulcrumtech.net/) by [@maxlapides](https://twitter.com/maxlapides)
-- [Organized Interiors](http://www.organizedinteriors.com/) by [@bombippy](https://twitter.com/bombippy)
-- [Developer Essentials](http://devessentials.net/) by [@dev_essentials](https://twitter.com/dev_essentials)
-- [The Black and Blue](http://www.theblackandblue.com/) by [@evanluzi](https://github.com/evanluzi)
-- [Message Ghost Theme](http://162.243.60.100/) by [@madeforghost](https://twitter.com/madeforghost)
-- [Echo](http://christopheryee.ca/ghost/echo/) by [@cmyee](https://twitter.com/cmyee)
-- [Mochi](http://christopheryee.ca/ghost/mochi/) by [@cmyee](https://twitter.com/cmyee)
-
-**Note:** You may have to resize your browser on some sites to see Pushy in action.
-
-To add your site, tweet to me [@cmyee](https://twitter.com/cmyee).
-
 ##Thanks to
 
-- [HTML5 Boilerplate](http://html5boilerplate.com/)
 - [jQuery](http://jquery.com/)
